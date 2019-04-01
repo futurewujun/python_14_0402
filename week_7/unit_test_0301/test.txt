@@ -1,0 +1,17 @@
+test_001 (week_7.unit_test_0301.unit_test_learn.TestAdd) ... FAIL
+test_002 (week_7.unit_test_0301.unit_test_learn.TestAdd) ... ok
+
+======================================================================
+FAIL: test_001 (week_7.unit_test_0301.unit_test_learn.TestAdd)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\PycharmProjects\python_14\week_7\unit_test_0301\unit_test_learn.py", line 19, in test_001
+    raise e #抓取异常之后要抛出异常
+  File "E:\PycharmProjects\python_14\week_7\unit_test_0301\unit_test_learn.py", line 16, in test_001
+    self.assertEqual(c,expect)  #断言
+AssertionError: 3 != 4
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+FAILED (failures=1)

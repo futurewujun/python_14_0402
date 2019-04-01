@@ -1,0 +1,84 @@
+# -*- coding: utf-8 -*-
+# 1：完成注册手机号码的初始化操作：修改Excel
+# 第一种操作：利用Excel设置初始化手机号码，每次进行+1操作，以及变量替换。记得做数据演示。
+# 第二种操作：每次从数据库里面查询最大的手机号码，在这个基础上加1（后期自己操作）
+# 第三种操作：每次清除完这个手机号码相关的数据，进行垃圾数据重置操作。 当前时间戳生成手机号码 参数替换完成 ${变量名}
+
+from openpyxl import load_workbook
+from API_Program.API_03.common import project_path
+from API_Program.API_03.common.read_config import ReadConfig
+
+class DoExcel:
+    '''完成测试数据的读取以及测试结果的写回'''
+    def __init__(self,file_name):
+        self.file_name=file_name    #Excel工作簿文件名或地址
+
+
+    def read_data(self,sheet_name):
+        '''从Excel读取数据，有返回值'''
+        #拿到配置文件的case_id
+        case_id=ReadConfig(project_path.conf_path).get_data('CASE','case_id')
+        wb=load_workbook(self.file_name)
+        st=wb[sheet_name]
+        # tel=wb['tel'].cell(1,2).value
+        tel=self.get_tel()
+        # print(type(tel))
+        #开始读取数据，
+        test_data=[]
+        for i in range(2,st.max_row+1): #每行
+            row_data={} # 每行的存到字典中，以每列的title作为key
+            row_data['CaseId']=st.cell(i,1).value
+            row_data['Module']=st.cell(i,2).value #第一列
+            row_data['Title']=st.cell(i,3).value
+            row_data['Url']=st.cell(i,4).value
+            row_data['Method']=st.cell(i,5).value
+            if st.cell(i,6).value.find('tel') != -1: #使用find函数，不存在返回-1，存在即!= -1
+            # if 'tel' in st.cell(i, 6).value:    #也可用成员运算符
+                row_data['Params']=st.cell(i,6).value.replace('tel',str(tel))
+                self.update_tel(tel+1)
+            else:
+                row_data['Params'] = st.cell(i, 6).value
+
+            row_data['ExpectedResult']=st.cell(i,7).value
+            test_data.append(row_data)
+
+        wb.close()
+        final_test_data=[]  #存最终的用例数据
+        # 根据配置文件执行指定的用例
+        if case_id == 'all':    #等于all，执行所有用例
+            final_test_data=test_data
+        # 否则，如果是列表，获取列表里的数字执行指定的用例
+        else:
+            for i in case_id:    #遍历配置文件中case_id的值
+                final_test_data.append(test_data[i-1]) #case_id=1,为test_data的第一条用例
+        return final_test_data
+
+    def update_tel(self,new_tel):
+        '''更新tel的值'''
+        wb=load_workbook(self.file_name)
+        st=wb['tel']
+        st.cell(1,2).value=new_tel
+        wb.save(self.file_name)
+        wb.close()
+    def get_tel(self):
+        '''获取tel的值'''
+        wb=load_workbook(self.file_name)
+        st=wb['tel']
+        wb.close()
+        tel=st.cell(1,2).value
+        return tel  #返回tel的值
+
+    def write_back(self,sheet_name,row,col,value):
+        '''写回测试结果到Excel中'''
+        wb=load_workbook(self.file_name)
+        st=wb[sheet_name]
+        st.cell(row,col).value=value
+        wb.save(self.file_name)
+        wb.close()
+
+if __name__ == '__main__':
+    file_name=project_path.case_path
+    sheet_name='Register_Login'
+    test_data=DoExcel(file_name).read_data(sheet_name)
+    print(test_data)
+
