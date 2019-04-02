@@ -8,7 +8,7 @@
 
 import unittest
 import sys
-sys.path.append('./')   #吧根目录追加到sys.path
+sys.path.append('./')   #把根目录追加到sys.path
 print(sys.path) #python编译的路径
 
 import HTMLTestRunnerNew
